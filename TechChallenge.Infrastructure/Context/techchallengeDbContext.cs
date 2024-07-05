@@ -25,6 +25,10 @@ namespace TechChallenge.Data.Context
 
             modelBuilder.Entity<State>().HasData(StateList.List);
         }
-
+        
+        public async Task MigrateAsync(CancellationToken cancellationToken = default)
+        {
+            await Database.MigrateAsync(cancellationToken);
+        }
     }
 }
