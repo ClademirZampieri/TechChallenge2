@@ -12,10 +12,12 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     command: >
       bash -c "
-      /opt/mssql/bin/sqlservr & sleep 1 && 
+      /opt/mssql/bin/sqlservr & sleep 15 && 
       /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P techChallenge@2024 -i /docker-entrypoint-initdb.d/init.sql && 
       wait
       "
+    networks:
+      - techchallenge-network
 
   prometheus:
     image: prom/prometheus
@@ -23,6 +25,8 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
+    networks:
+      - techchallenge-network
 
   grafana:
     image: grafana/grafana
@@ -32,6 +36,8 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - grafana-storage:/var/lib/grafana
+    networks:
+      - techchallenge-network
 
   webapi:
     build:
@@ -45,6 +51,12 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__SqlConnection: "Server=sqlserver,1433;Database=TechChallenge2;User ID=tech_challenge;Password=tech@2024;Trusted_Connection=False; TrustServerCertificate=True;"
+    networks:
+      - techchallenge-network
 
 volumes:
   grafana-storage:
+
+networks:
+  techchallenge-network:
+    driver: bridge
