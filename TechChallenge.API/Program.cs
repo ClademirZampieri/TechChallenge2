@@ -1,9 +1,11 @@
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using Prometheus;
 using TechChallenge.API.AutoMapper;
 using TechChallenge.API.Configurations;
 using TechChallenge.Data.Context;
+using TechChallenge.Data.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
  
@@ -38,11 +40,23 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+//Executa as migrações do banco de dados
+app.MigrateDatabase();
+
 app.UseCors(x => x
     .WithOrigins(urls)
     .AllowAnyMethod()
     .AllowAnyHeader()
     .AllowCredentials());
+
+// Configura o endpoint de métricas do Prometheus
+app.UseMetricServer();
+
+// Configura a coleta de métricas padrão de ASP.NET Core
+app.UseHttpMetrics();
+
+// Garante que o endpoint de métricas está mapeado
+app.MapMetrics();
 
 app.UseHttpsRedirection();
 
