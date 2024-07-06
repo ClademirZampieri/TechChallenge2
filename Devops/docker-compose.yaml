@@ -1,4 +1,3 @@
-version: '3.7'
 services:
   sqlserver:
     container_name: sqlserver
@@ -6,14 +5,14 @@ services:
     ports:
       - "1433:1433"
     environment:
-      SA_PASSWORD: "techChallenge@2024"
+      SA_PASSWORD: "techChallenge@outra"
       ACCEPT_EULA: "Y"
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     command: >
       bash -c "
-      /opt/mssql/bin/sqlservr & sleep 15 && 
-      /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P techChallenge@2024 -i /docker-entrypoint-initdb.d/init.sql && 
+      /opt/mssql/bin/sqlservr & sleep 30 && 
+      /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P techChallenge@outra -i /docker-entrypoint-initdb.d/init.sql && 
       wait
       "
     networks:
