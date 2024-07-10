@@ -60,7 +60,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'ApiFrontTechChallenge'
+          app-name: 'TechChallenge2'
           slot-name: 'Production'
           package: .
           
