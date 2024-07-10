@@ -44,7 +44,6 @@ if (app.Environment.IsDevelopment())
 app.MigrateDatabase();
 
 app.UseCors(x => x
-    .WithOrigins(urls)
     .AllowAnyMethod()
     .AllowAnyHeader()
     .AllowCredentials());
