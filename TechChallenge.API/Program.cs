@@ -33,12 +33,8 @@ builder.Services.AddControllers().AddFluentValidation(v =>
 var urls = builder.Configuration.GetSection("AllowOrigins").Get<string[]>();
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 //Executa as migrações do banco de dados
 app.MigrateDatabase();
