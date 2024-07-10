@@ -43,11 +43,6 @@ if (app.Environment.IsDevelopment())
 //Executa as migrações do banco de dados
 app.MigrateDatabase();
 
-app.UseCors(x => x
-    .AllowAnyMethod()
-    .AllowAnyHeader()
-    .AllowCredentials());
-
 // Configura o endpoint de métricas do Prometheus
 app.UseMetricServer();
 
