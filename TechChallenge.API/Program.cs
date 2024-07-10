@@ -39,6 +39,12 @@ app.UseSwaggerUI();
 //Executa as migrações do banco de dados
 app.MigrateDatabase();
 
+app.UseCors(x => x
+    .WithOrigins(urls)
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowCredentials());
+
 // Configura o endpoint de métricas do Prometheus
 app.UseMetricServer();
 
