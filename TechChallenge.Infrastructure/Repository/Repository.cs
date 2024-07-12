@@ -33,7 +33,7 @@ namespace TechChallenge.Infrastructure.Repository
 
         public async Task<IEnumerable<TEntity>> Find(Expression<Func<TEntity, bool>> predicate)
         {
-            return await DbSet.AsNoTracking().Where(predicate).ToListAsync();
+            return await DbSet.Where(predicate).ToListAsync();
         }
 
         public virtual async Task<IEnumerable<TEntity>> GetAll()
@@ -59,7 +59,7 @@ namespace TechChallenge.Infrastructure.Repository
 
             if (take.HasValue)
                 query = query.Take(take.Value);
-            response.List = query.AsNoTracking().Select(select).ToList();
+            response.List = query.Select(select).ToList();
             response.TotalRegisterFilter = query.Count();
 
             return response;
