@@ -15,7 +15,7 @@ namespace TechChallenge.Data.Repository
         
         public  async Task<IEnumerable<Contact>> GetAll()
         {
-            return await Db.Contacts.AsNoTracking().Include(d => d.State).OrderBy(c => c.Name).ToListAsync();  
+            return await Db.Contacts.Include(d => d.State).OrderBy(c => c.Name).ToListAsync();  
         }
 
         public override async Task<Contact> GetById(Guid id)
