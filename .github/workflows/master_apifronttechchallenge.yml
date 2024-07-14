@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy ApiFrontTechChallenge to Azure Web App
+name: Build, test, and deploy ApiFrontTechChallenge and FrontEnd to Azure Web App
 
 on:
   push:
@@ -22,21 +22,72 @@ jobs:
           dotnet-version: '8.x'
           include-prerelease: true
 
-      - name: Build with dotnet
-        run: dotnet build .\TechChallenge.API\TechChallenge.API.csproj --configuration Release
+      - name: Build API with dotnet
+        run: dotnet build --configuration Release
 
-      - name: dotnet publish
-        run: dotnet publish .\TechChallenge.API\TechChallenge.API.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp_api
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
-        with:
-          name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp_api
-
-  deploy:
+  test:
     runs-on: windows-latest
     needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.x'
+          include-prerelease: true
+
+      - name: Test API with dotnet
+        run: dotnet test --configuration Release
+
+  publish-api:
+    runs-on: windows-latest
+    needs: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.x'
+          include-prerelease: true
+
+      - name: Publish API with dotnet
+        run: dotnet publish .\TechChallenge.API\TechChallenge.API.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp_api
+
+      - name: Upload API artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: .net-api-app
+          path: ${{env.DOTNET_ROOT}}/myapp_api
+
+  publish-frontend:
+    runs-on: windows-latest
+    needs: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.x'
+          include-prerelease: true
+
+      - name: Publish FrontEnd with dotnet
+        run: dotnet publish .\TechChallenge.Web\TechChallenge.Web.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
+
+      - name: Upload FrontEnd artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: .net-frontend-app
+          path: ${{env.DOTNET_ROOT}}/myapp
+
+  deploy-api:
+    runs-on: windows-latest
+    needs: publish-api
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
@@ -44,10 +95,10 @@ jobs:
       id-token: write #This is required for requesting the JWT
 
     steps:
-      - name: Download artifact from build job
+      - name: Download API artifact from build job
         uses: actions/download-artifact@v3
         with:
-          name: .net-app
+          name: .net-api-app
       
       - name: Login to Azure
         uses: azure/login@v1
@@ -63,4 +114,33 @@ jobs:
           app-name: 'ApiFrontTechChallenge'
           slot-name: 'Production'
           package: .
-          
+
+  deploy-frontend:
+    runs-on: windows-latest
+    needs: publish-frontend
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    permissions:
+      id-token: write #This is required for requesting the JWT
+
+    steps:
+      - name: Download FrontEnd artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: .net-frontend-app
+      
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0FBFD6DD17DB41EA8130AFD5CD6586CD }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_369D85363AFA41E4B90EA57537229AAB }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_158C9A2E12704974A9D07CF6BC36B9E9 }}
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'TechChallenge2'
+          slot-name: 'Production'
+          package: .
