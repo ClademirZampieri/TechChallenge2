@@ -40,7 +40,7 @@ jobs:
           include-prerelease: true
 
       - name: Test API with dotnet
-        run: dotnet test TechChallenge.Domain.UnitTest\TechChallenge.Domain.UnitTest.csproj --configuration Release
+        run: dotnet test ./TechChallenge.Domain.UnitTest/TechChallenge.Domain.UnitTest.csproj --configuration Release
 
   integration-test:
     runs-on: ubuntu-latest
@@ -57,7 +57,7 @@ jobs:
           include-prerelease: true
 
       - name: Test API with dotnet
-        run: dotnet test TechChallenge.Domain.IntegrationTest\TechChallenge.Domain.IntegrationTest.csproj --configuration Release
+        run: dotnet test ./TechChallenge.Domain.IntegrationTest/TechChallenge.Domain.IntegrationTest.csproj --configuration Release
 
   publish-api:
     runs-on: ubuntu-latest
@@ -73,7 +73,7 @@ jobs:
           include-prerelease: true
 
       - name: Publish API with dotnet
-        run: dotnet publish .\TechChallenge.API\TechChallenge.API.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp_api
+        run: dotnet publish ./TechChallenge.API/TechChallenge.API.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp_api
 
       - name: Upload API artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -109,7 +109,7 @@ jobs:
           include-prerelease: true
 
       - name: Publish FrontEnd with dotnet
-        run: dotnet publish .\TechChallenge.Web\TechChallenge.Web.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish ./TechChallenge.Web/TechChallenge.Web.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload FrontEnd artifact for deployment job
         uses: actions/upload-artifact@v3
