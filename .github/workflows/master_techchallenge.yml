@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Alterado para usar o Ubuntu
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +26,7 @@ jobs:
         run: dotnet build --configuration Release
 
   unit-test:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: build
     continue-on-error: true
 
@@ -43,7 +43,7 @@ jobs:
         run: dotnet test .\TechChallenge.Domain.UnitTest\TechChallenge.Domain.UnitTest.csproj --configuration Release
 
   integration-test:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: build
     continue-on-error: true
 
@@ -60,7 +60,7 @@ jobs:
         run: dotnet test .\TechChallenge.Domain.IntegrationTest\TechChallenge.Domain.IntegrationTest.csproj --configuration Release
 
   publish-api:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: [unit-test, integration-test]
 
     steps:
@@ -96,7 +96,7 @@ jobs:
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/api-front-tech-challenge:latest
 
   publish-frontend:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: [unit-test, integration-test]
 
     steps:
@@ -131,8 +131,8 @@ jobs:
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/front-tech-challenge:latest -f .\TechChallenge.Web.dockerfile .
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/front-tech-challenge:latest
 
-  deploy-api:
-    runs-on: windows-latest
+  deploy-api-azure:
+    runs-on: ubuntu-latest
     needs: publish-api
     environment:
       name: 'Production'
@@ -161,8 +161,8 @@ jobs:
           slot-name: 'Production'
           package: .
 
-  deploy-frontend:
-    runs-on: windows-latest
+  deploy-frontend-azure:
+    runs-on: ubuntu-latest
     needs: publish-frontend
     environment:
       name: 'Production'
