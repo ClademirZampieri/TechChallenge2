@@ -64,6 +64,20 @@ jobs:
           name: .net-api-app
           path: ${{env.DOTNET_ROOT}}/myapp_api
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Build and push API image
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/api-front-tech-challenge:latest -f Dockerfile .
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/api-front-tech-challenge:latest
+
   publish-frontend:
     runs-on: windows-latest
     needs: test
@@ -86,6 +100,20 @@ jobs:
           name: .net-frontend-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Build and push FrontEnd image
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/front-tech-challenge:latest -f .\TechChallenge.Web.dockerfile .
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/front-tech-challenge:latest
+
   deploy-api:
     runs-on: windows-latest
     needs: publish-api
@@ -93,7 +121,7 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
+      id-token: write # This is required for requesting the JWT
 
     steps:
       - name: Download API artifact from build job
@@ -123,7 +151,7 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
+      id-token: write # This is required for requesting the JWT
 
     steps:
       - name: Download FrontEnd artifact from build job
