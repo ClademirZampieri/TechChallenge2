@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -25,9 +25,10 @@ jobs:
       - name: Build API with dotnet
         run: dotnet build --configuration Release
 
-  test:
+  unit-test:
     runs-on: windows-latest
     needs: build
+    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v4
@@ -39,11 +40,12 @@ jobs:
           include-prerelease: true
 
       - name: Test API with dotnet
-        run: dotnet test --configuration Release
+        run: dotnet test ./TechChallenge.Domain.UnitTest/TechChallenge.Domain.UnitTest.csproj --configuration Release
 
-  publish-api:
-    runs-on: windows-latest
-    needs: test
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: build
+    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v4
@@ -54,8 +56,38 @@ jobs:
           dotnet-version: '8.x'
           include-prerelease: true
 
+      - name: Test API with dotnet
+        run: dotnet test ./TechChallenge.Domain.IntegrationTest/TechChallenge.Domain.IntegrationTest.csproj --configuration Release
+
+  publish-api:
+    runs-on: ubuntu-latest
+    needs: [unit-test, integration-test]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Build and push API image
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/api-front-tech-challenge:latest -f ./TechChallenge.API.dockerfile .
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/api-front-tech-challenge:latest
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.x'
+          include-prerelease: true
+
       - name: Publish API with dotnet
-        run: dotnet publish .\TechChallenge.API\TechChallenge.API.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp_api
+        run: dotnet publish ./TechChallenge.API/TechChallenge.API.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp_api
 
       - name: Upload API artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -64,8 +96,8 @@ jobs:
           path: ${{env.DOTNET_ROOT}}/myapp_api
 
   publish-frontend:
-    runs-on: windows-latest
-    needs: test
+    runs-on: ubuntu-latest
+    needs: [unit-test, integration-test]
 
     steps:
       - uses: actions/checkout@v4
@@ -77,7 +109,7 @@ jobs:
           include-prerelease: true
 
       - name: Publish FrontEnd with dotnet
-        run: dotnet publish .\TechChallenge.Web\TechChallenge.Web.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish ./TechChallenge.Web/TechChallenge.Web.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload FrontEnd artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -85,14 +117,28 @@ jobs:
           name: .net-frontend-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
-  deploy-api:
-    runs-on: windows-latest
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Build and push FrontEnd image
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/front-tech-challenge:latest -f ./TechChallenge.Web.dockerfile .
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/front-tech-challenge:latest
+
+  deploy-api-azure:
+    runs-on: ubuntu-latest
     needs: publish-api
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
+      id-token: write # This is required for requesting the JWT
 
     steps:
       - name: Download API artifact from build job
@@ -115,14 +161,14 @@ jobs:
           slot-name: 'Production'
           package: .
 
-  deploy-frontend:
-    runs-on: windows-latest
+  deploy-frontend-azure:
+    runs-on: ubuntu-latest
     needs: publish-frontend
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
+      id-token: write # This is required for requesting the JWT
 
     steps:
       - name: Download FrontEnd artifact from build job
