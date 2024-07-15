@@ -92,7 +92,7 @@ jobs:
 
       - name: Build and push API image
         run: |
-          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/api-front-tech-challenge:latest -f ./TechChallenge.API.Dockerfile .
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/api-front-tech-challenge:latest -f TechChallenge.API.Dockerfile .
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/api-front-tech-challenge:latest
 
   publish-frontend:
@@ -128,7 +128,7 @@ jobs:
 
       - name: Build and push FrontEnd image
         run: |
-          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/front-tech-challenge:latest -f ./TechChallenge.Web.dockerfile .
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/front-tech-challenge:latest -f TechChallenge.Web.dockerfile .
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/front-tech-challenge:latest
 
   deploy-api-azure:
