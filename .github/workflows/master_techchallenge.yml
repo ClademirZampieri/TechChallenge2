@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest  # Alterado para usar o Ubuntu
 
     steps:
       - uses: actions/checkout@v4
@@ -40,7 +40,7 @@ jobs:
           include-prerelease: true
 
       - name: Test API with dotnet
-        run: dotnet test .\Tests\TechChallenge.Domain.UnitTest\TechChallenge.Domain.UnitTest.csproj --configuration Release
+        run: dotnet test .\TechChallenge.Domain.UnitTest\TechChallenge.Domain.UnitTest.csproj --configuration Release
 
   integration-test:
     runs-on: windows-latest
@@ -57,7 +57,7 @@ jobs:
           include-prerelease: true
 
       - name: Test API with dotnet
-        run: dotnet test .\Tests\TechChallenge.Domain.IntegrationTest\TechChallenge.Domain.IntegrationTest.csproj --configuration Release
+        run: dotnet test .\TechChallenge.Domain.IntegrationTest\TechChallenge.Domain.IntegrationTest.csproj --configuration Release
 
   publish-api:
     runs-on: windows-latest
