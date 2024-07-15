@@ -25,7 +25,7 @@ jobs:
       - name: Build API with dotnet
         run: dotnet build --configuration Release
 
-  test:
+  unit-test:
     runs-on: windows-latest
     needs: build
     continue-on-error: true
@@ -40,11 +40,28 @@ jobs:
           include-prerelease: true
 
       - name: Test API with dotnet
-        run: dotnet test --configuration Release
+        run: dotnet test .\Tests\TechChallenge.Domain.UnitTest\TechChallenge.Domain.UnitTest.csproj --configuration Release
+
+  integration-test:
+    runs-on: windows-latest
+    needs: build
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.x'
+          include-prerelease: true
+
+      - name: Test API with dotnet
+        run: dotnet test .\Tests\TechChallenge.Domain.IntegrationTest\TechChallenge.Domain.IntegrationTest.csproj --configuration Release
 
   publish-api:
     runs-on: windows-latest
-    needs: test
+    needs: [unit-test, integration-test]
 
     steps:
       - uses: actions/checkout@v4
@@ -80,7 +97,7 @@ jobs:
 
   publish-frontend:
     runs-on: windows-latest
-    needs: test
+    needs: [unit-test, integration-test]
 
     steps:
       - uses: actions/checkout@v4
