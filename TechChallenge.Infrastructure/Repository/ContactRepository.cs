@@ -20,7 +20,6 @@ namespace TechChallenge.Data.Repository
 
         public override async Task<Contact> GetById(Guid id)
         {
-            //return await Db.Contacts.AsNoTracking().Include(d => d.State).FirstOrDefaultAsync(c => c.Id == id);
             return Db.Set<Contact>().SingleOrDefault(c => c.Id == id);
         }
     }
