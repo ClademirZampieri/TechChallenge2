@@ -56,7 +56,7 @@ jobs:
       - name: Test API with dotnet
         run: dotnet test ./TechChallenge.Domain.IntegrationTest/TechChallenge.Domain.IntegrationTest.csproj --configuration Release
 
-  build-push-api-to-github:
+  build-push-api-to-dockerhub:
     runs-on: ubuntu-latest
     needs: [unit-test, integration-test]
 
@@ -77,7 +77,7 @@ jobs:
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/api-front-tech-challenge:latest -f ./TechChallenge.API.dockerfile .
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/api-front-tech-challenge:latest
 
-  build-push-front-to-github:
+  build-push-front-to-dockerhub:
     runs-on: ubuntu-latest
     needs: [unit-test, integration-test]
 
