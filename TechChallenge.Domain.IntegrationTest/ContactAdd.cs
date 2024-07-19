@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using TechChallenge.Data.Context;
 using TechChallenge.Data.Repository;
 using TechChallenge.Domain.Models;
@@ -15,7 +14,7 @@ public class ContactAdd
     public ContactAdd(ITestOutputHelper output, ContextFixture fixture)
     {
         _context = fixture._context;
-        //output.WriteLine(_context.GetHashCode().ToString());
+        output.WriteLine(_context.GetHashCode().ToString());
     }    
 
     [Theory]
@@ -26,7 +25,6 @@ public class ContactAdd
     {
         //arrange
         var contact = new Contact { Id = new Guid(id), Name = name, Email = email, Phone = phone, StateId = new Guid(stateId) };
-
         
         var contactRepository = new ContactRepository(_context);
         var service = new ContactService(contactRepository);
